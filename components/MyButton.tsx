@@ -1,70 +1,77 @@
 import { cva, VariantProps } from "class-variance-authority";
-import { Text, TouchableOpacity } from "react-native";
+import { ReactNode, useState } from "react";
+import { TouchableOpacity, View } from "react-native";
 
-const classes = {
-   active:
-      "before:shadow-none translate-y-[2px] text-amber-100 before:bg-amber-800",
-   button: "inline-flex relative  items-center justify-center z-0",
-};
-
-const ButtonVariant = cva(classes.button, {
+const BackVariant = cva("rounded-2xl", {
    variants: {
-      variant: {
-         primary:
-            "before:border-[#78350f] before:content-[''] before:absolute before:z-[-1] before:inset-0 before:rounded-lg  before:shadow-[0_2px_0_#78350f] active:translate-y-[2px] active:before:shadow-none",
-         clear: "",
-      },
-      size: {
-         clear: "",
-         primary: "px-[15px] py-[5px]",
-      },
       colors: {
-         primary: "text-amber-800 before:bg-amber-100",
-         second: "text-amber-100 before:bg-amber-800",
+         primary: "bg-amber-900",
+         second: "bg-amber-900",
          clear: "",
-      },
-      border: {
-         primary: "before:border-[2px]",
-         thin: "before:border-[1px]",
-         clear: "before:border-b-[2px]",
-      },
-      fontWeight: {
-         primary: "font-[500]",
-         thin: "",
       },
    },
    defaultVariants: {
-      size: "primary",
       colors: "primary",
-      variant: "primary",
-      border: "primary",
-      fontWeight: "primary",
    },
 });
 
-interface Props extends VariantProps<typeof ButtonVariant> {
-   title: string;
+const FontVariant = cva(
+   "rounded-2xl flex space-x-1 items-center justify-center flex-row",
+   {
+      variants: {
+         colors: {
+            primary: "bg-amber-800",
+            second: "bg-amber-700 ",
+            clear: "",
+         },
+         sizes: {
+            primary: "px-6 py-2",
+            clear: "",
+         },
+      },
+      defaultVariants: {
+         colors: "primary",
+         sizes: "primary",
+      },
+   }
+);
+
+interface Props
+   extends VariantProps<typeof BackVariant>,
+      VariantProps<typeof FontVariant> {
    onPress?: () => void;
    loading?: boolean;
    disabled?: boolean;
-   className?: string;
+   backStyle?: string;
+
    active?: boolean;
+   children: ReactNode;
 }
 
 export default function MyButton({
-   title,
-   border,
    colors,
-   size,
-   variant,
    onPress,
-   className,
+   backStyle = "",
+   sizes,
+   children,
 }: Props) {
+   const [press, setPress] = useState(false);
+
    return (
       <TouchableOpacity
-         className={ButtonVariant({ border, colors, size, variant, className })}
+         onPress={onPress}
+         onPressIn={() => setPress(true)}
+         onPressOut={() => setPress(false)}
+         activeOpacity={1}
+         className={`${BackVariant({ colors, className: backStyle })} `}
       >
-         <Text className="font-nunito">{title}</Text>
+         <View
+            className={` ${FontVariant({ colors, sizes })} ${
+               press ? "translate-y-[-3px]" : "translate-y-[-6px]"
+            }`}
+         >
+            {children}
+         </View>
       </TouchableOpacity>
    );
 }
