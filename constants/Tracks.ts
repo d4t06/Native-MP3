@@ -1,3 +1,5 @@
+import { Track } from "react-native-track-player";
+
 const songs = [
    {
       id: 129,
@@ -279,9 +281,9 @@ const songs = [
 ];
 
 const trackList: Track[] = songs.map((s) => ({
+   id: s.id,
    url: s.song_url,
    artist: s.singer,
-   artwork: "",
    duration: s.duration,
    title: s.name,
 }));

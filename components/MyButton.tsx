@@ -43,7 +43,7 @@ interface Props
    loading?: boolean;
    disabled?: boolean;
    backStyle?: string;
-
+   fontStyle?: string;
    active?: boolean;
    children: ReactNode;
 }
@@ -52,26 +52,29 @@ export default function MyButton({
    colors,
    onPress,
    backStyle = "",
+   fontStyle,
    sizes,
    children,
+   disabled,
 }: Props) {
    const [press, setPress] = useState(false);
 
    return (
-      <TouchableOpacity
-         onPress={onPress}
-         onPressIn={() => setPress(true)}
-         onPressOut={() => setPress(false)}
-         activeOpacity={1}
-         className={`${BackVariant({ colors, className: backStyle })} `}
-      >
-         <View
-            className={` ${FontVariant({ colors, sizes })} ${
-               press ? "translate-y-[-3px]" : "translate-y-[-6px]"
-            }`}
+      <View className={`${BackVariant({ colors, className: backStyle })} `}>
+         <TouchableOpacity
+            onPress={onPress}
+            onPressIn={() => setPress(true)}
+            onPressOut={() => setPress(false)}
+            activeOpacity={1}
+            disabled={disabled}
+            className={`${FontVariant({
+               colors,
+               sizes,
+               className: fontStyle,
+            })} ${press ? "translate-y-[-3px]" : "translate-y-[-6px]"}`}
          >
             {children}
-         </View>
-      </TouchableOpacity>
+         </TouchableOpacity>
+      </View>
    );
 }
