@@ -9,9 +9,16 @@ const BackVariant = cva("rounded-2xl", {
          second: "bg-amber-900",
          clear: "",
       },
+      rounded: {
+         primary: "rounded-2xl",
+         xl: "rounded-xl",
+         lg: "rounded-lg",
+         clear: "",
+      },
    },
    defaultVariants: {
       colors: "primary",
+      rounded: "primary",
    },
 });
 
@@ -28,10 +35,17 @@ const FontVariant = cva(
             primary: "px-6 py-2",
             clear: "",
          },
+         rounded: {
+            primary: "rounded-2xl",
+            xl: "rounded-xl",
+            lg: "rounded-lg",
+            clear: "",
+         },
       },
       defaultVariants: {
          colors: "primary",
          sizes: "primary",
+         rounded: "primary",
       },
    }
 );
@@ -56,20 +70,28 @@ export default function MyButton({
    sizes,
    children,
    disabled,
+   rounded,
 }: Props) {
    const [press, setPress] = useState(false);
 
    return (
-      <View className={`${BackVariant({ colors, className: backStyle })} `}>
+      <View
+         className={`${BackVariant({
+            colors,
+            rounded,
+            className: backStyle,
+         })} `}
+      >
          <TouchableOpacity
             onPress={onPress}
             onPressIn={() => setPress(true)}
             onPressOut={() => setPress(false)}
             activeOpacity={1}
             disabled={disabled}
-            className={`${FontVariant({
+            className={` ${FontVariant({
                colors,
                sizes,
+               rounded,
                className: fontStyle,
             })} ${press ? "translate-y-[-3px]" : "translate-y-[-6px]"}`}
          >

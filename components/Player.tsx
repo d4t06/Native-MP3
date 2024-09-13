@@ -39,7 +39,8 @@ export default function Player() {
       togglePlayBack,
    } = usePlayer({ processLineBaseRef: baseRef });
 
-   const pausing = state == State.Paused || state == State.Stopped;
+   const pausing =
+      state == State.Paused || state == State.Stopped || state === State.Ready;
 
    Animated.loop(
       Animated.timing(deg, {
@@ -50,12 +51,7 @@ export default function Player() {
       })
    ).start();
 
-   // useEffect(() => {
-
-   // },
-   //  []);
-
-   console.log("chekc stats", state);
+   console.log("check state", state);
 
    return (
       <>
@@ -67,10 +63,10 @@ export default function Player() {
                      : "h-0 pointer-events-none opacity-0"
                }`}
             >
-               <Text className="font-nunito-medium text-3xl text-center text-white">
+               <Text numberOfLines={1} className=" font-nunito-bold text-2xl text-center text-amber-100">
                   {currentSong?.title || "Song name"}
                </Text>
-               <Text className="font-nunito-medium text-lg text-center text-white">
+               <Text className=" font-nunito-medium text-base text-center text-amber-100">
                   {currentSong?.artist || "..."}
                </Text>
 
@@ -111,16 +107,15 @@ export default function Player() {
                </View>
 
                <View className="mt-5 flex-row justify-center items-center">
-                  <MyButton onPress={previous} colors={"second"}>
-                     <BackwardIcon color={"#fef3c7"} size={26} />
+                  <MyButton rounded={"lg"} onPress={previous} colors={"second"}>
+                     <BackwardIcon color={"#fef3c7"} size={28} />
                   </MyButton>
 
                   <MyButton
+                     rounded={"lg"}
                      onPress={togglePlayBack}
                      disabled={state === State.Buffering}
-                     backStyle={`ml-4 ${
-                        state === State.Buffering ? "opacity-60" : ""
-                     }`}
+                     backStyle={`ml-4`}
                      colors={"second"}
                   >
                      {state === State.Buffering ? (
@@ -149,8 +144,13 @@ export default function Player() {
                      )}
                   </MyButton>
 
-                  <MyButton onPress={next} backStyle="ml-4" colors={"second"}>
-                     <ForwardIcon color={"#fef3c7"} size={26} />
+                  <MyButton
+                     rounded={"lg"}
+                     onPress={next}
+                     backStyle="ml-4"
+                     colors={"second"}
+                  >
+                     <ForwardIcon color={"#fef3c7"} size={28} />
                   </MyButton>
                </View>
             </View>
@@ -175,14 +175,14 @@ export default function Player() {
                         }`}
                      >
                         <Text
-                           className={`font-nunito-medium text-xl text-center ${
+                           className={`font-nunito-bold text-xl text-left ${
                               active ? "text-amber-800" : "text-amber-100"
                            }`}
                         >
                            {s?.title || "Song name"}
                         </Text>
                         <Text
-                           className={`font-nunito-medium text-lg  text-center ${
+                           className={`font-nunito-medium text-base text-left ${
                               active ? "text-amber-800/70" : "text-amber-100/70"
                            }`}
                         >

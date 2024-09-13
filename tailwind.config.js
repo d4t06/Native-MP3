@@ -6,9 +6,10 @@ module.exports = {
    theme: {
       extend: {
          fontFamily: {
-            'nunito': ['Nunito'],
-            'nunito-medium': ['Nunito-Medium']
-         }
+            "nunito": ["Nunito"],
+            "nunito-medium": ["Nunito-Medium"],
+            "nunito-bold": ["Nunito-Bold"],
+         },
       },
    },
    plugins: [],

@@ -6,6 +6,7 @@ export default function RootLayout() {
    const [loaded] = useFonts({
       Nunito: require("../assets/fonts/Nunito-Regular.ttf"),
       "Nunito-Medium": require("../assets/fonts/Nunito-Medium.ttf"),
+      "Nunito-Bold": require("../assets/fonts/Nunito-Bold.ttf"),
    });
 
    if (!loaded) return null;

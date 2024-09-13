@@ -2,6 +2,7 @@ import trackList from "@/constants/Tracks";
 import { PlaybackService } from "@/services/PlayBackService";
 import { RefObject, useEffect, useRef } from "react";
 import { GestureResponderEvent, TouchableOpacity } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import TrackPlayer, {
    Capability,
    Event,
@@ -35,6 +36,21 @@ export default function usePlayer({ processLineBaseRef }: Props) {
    useTrackPlayerEvents([Event.PlaybackQueueEnded], async (event) => {
       await TrackPlayer.skip(0);
       await TrackPlayer.stop();
+   });
+
+   useTrackPlayerEvents([Event.PlaybackProgressUpdated], async (event) => {
+      try {
+         if (!(event.position % 5))
+            await AsyncStorage.setItem("position", event.position + "");
+      } catch (error) {}
+   });
+
+   useTrackPlayerEvents([Event.PlaybackActiveTrackChanged], async (event) => {
+      try {
+         if (event.index === undefined) throw Error("index is undefined");
+         await AsyncStorage.setItem("current-index", event.index + "");
+         // await AsyncStorage.setItem("current-song-id", event.index + "");
+      } catch (error) {}
    });
 
    const next = async () => {
@@ -94,21 +110,28 @@ export default function usePlayer({ processLineBaseRef }: Props) {
    };
 
    const setUp = async () => {
-      TrackPlayer.registerPlaybackService(() => PlaybackService);
-      await TrackPlayer.setupPlayer();
-      await TrackPlayer.updateOptions({
-         capabilities: [
-            Capability.Play,
-            Capability.Pause,
-            Capability.SkipToNext,
-            Capability.SkipToPrevious,
-         ],
-      });
+      try {
+         TrackPlayer.registerPlaybackService(() => PlaybackService);
+         await TrackPlayer.setupPlayer();
+         await TrackPlayer.updateOptions({
+            capabilities: [
+               Capability.Play,
+               Capability.Pause,
+               Capability.SkipToNext,
+               Capability.SkipToPrevious,
+            ],
+         });
 
-      await TrackPlayer.add(trackList);
-      await TrackPlayer.setQueue(trackList);
+         await TrackPlayer.add(trackList);
+         await TrackPlayer.setQueue(trackList);
 
-      await TrackPlayer.stop();
+         const index = await AsyncStorage.getItem("current-index");
+         if (index) await TrackPlayer.skip(+index);
+
+         await TrackPlayer.stop();
+      } catch (error) {
+         console.log(error);
+      }
    };
 
    useEffect(() => {
