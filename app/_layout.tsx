@@ -1,6 +1,7 @@
 import { Slot } from "expo-router";
 import { View } from "react-native";
 import { useFonts } from "expo-font";
+import SongProvider from "@/stores/SongContext";
 
 export default function RootLayout() {
    const [loaded] = useFonts({
@@ -12,8 +13,10 @@ export default function RootLayout() {
    if (!loaded) return null;
 
    return (
-      <View className="flex-1 bg-amber-100 justify-center items-center">
-         <Slot />
-      </View>
+      <SongProvider>
+         <View className="flex-1 bg-amber-100 justify-center items-center">
+            <Slot />
+         </View>
+      </SongProvider>
    );
 }

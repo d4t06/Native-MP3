@@ -1,28 +1,20 @@
 import trackList from "@/constants/Tracks";
-import { PlaybackService } from "@/services/PlayBackService";
-import { RefObject, useEffect, useRef } from "react";
-import { GestureResponderEvent, TouchableOpacity } from "react-native";
+import { useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import TrackPlayer, {
-   Capability,
    Event,
    State,
    useActiveTrack,
    usePlaybackState,
-   useProgress,
    useTrackPlayerEvents,
 } from "react-native-track-player";
 
-type Props = {
-   processLineBaseRef: RefObject<TouchableOpacity>;
-};
+export default function useControl() {
+   const firstTimeLoadedSong = useRef(true);
 
-export default function usePlayer({ processLineBaseRef }: Props) {
    const playBackState = usePlaybackState();
-   const progress = useProgress();
    const currentSong = useActiveTrack();
-
-   const ranEffect = useRef(false);
+   const [currentIndex, setCurrentIndex] = useState(0);
 
    const pausing =
       playBackState.state == State.Paused ||
@@ -38,18 +30,16 @@ export default function usePlayer({ processLineBaseRef }: Props) {
       await TrackPlayer.stop();
    });
 
-   useTrackPlayerEvents([Event.PlaybackProgressUpdated], async (event) => {
-      try {
-         if (!(event.position % 5))
-            await AsyncStorage.setItem("position", event.position + "");
-      } catch (error) {}
-   });
-
    useTrackPlayerEvents([Event.PlaybackActiveTrackChanged], async (event) => {
       try {
          if (event.index === undefined) throw Error("index is undefined");
+
          await AsyncStorage.setItem("current-index", event.index + "");
-         // await AsyncStorage.setItem("current-song-id", event.index + "");
+         setCurrentIndex(event.index);
+
+         if (!firstTimeLoadedSong.current)
+            await AsyncStorage.setItem("position", "0");
+         else firstTimeLoadedSong.current = false;
       } catch (error) {}
    });
 
@@ -82,6 +72,8 @@ export default function usePlayer({ processLineBaseRef }: Props) {
    const togglePlayBack = async () => {
       const currentTrack = await TrackPlayer.getActiveTrack();
 
+      if (playBackState.state === undefined) return;
+
       if (currentTrack != null) {
          if (pausing) {
             console.log("play");
@@ -93,60 +85,17 @@ export default function usePlayer({ processLineBaseRef }: Props) {
       }
    };
 
-   const handleSeek = (e: GestureResponderEvent) => {
-      e.persist();
-      processLineBaseRef.current?.measure((_x, _y, width) => {
-         if (!currentSong || !currentSong.duration) return;
-         const ratio = e.nativeEvent.locationX / width;
-         const newTime = Math.round(currentSong.duration * ratio);
-         TrackPlayer.seekTo(newTime);
-      });
-   };
-
    const handleSetSong = async (index: number) => {
       await TrackPlayer.skip(index);
 
       if (playBackState.state !== State.Playing) await TrackPlayer.play();
    };
 
-   const setUp = async () => {
-      try {
-         TrackPlayer.registerPlaybackService(() => PlaybackService);
-         await TrackPlayer.setupPlayer();
-         await TrackPlayer.updateOptions({
-            capabilities: [
-               Capability.Play,
-               Capability.Pause,
-               Capability.SkipToNext,
-               Capability.SkipToPrevious,
-            ],
-         });
-
-         await TrackPlayer.add(trackList);
-         await TrackPlayer.setQueue(trackList);
-
-         const index = await AsyncStorage.getItem("current-index");
-         if (index) await TrackPlayer.skip(+index);
-
-         await TrackPlayer.stop();
-      } catch (error) {
-         console.log(error);
-      }
-   };
-
-   useEffect(() => {
-      if (!ranEffect.current) {
-         ranEffect.current = true;
-         setUp();
-      }
-   }, []);
-
    return {
       next,
       previous,
-      handleSeek,
+      currentIndex,
       handleSetSong,
-      progress,
       currentSong,
       state: playBackState.state,
       togglePlayBack,

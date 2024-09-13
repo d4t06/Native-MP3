@@ -1,40 +1,47 @@
 {
-  "expo": {
-    "name": "my-app",
-    "slug": "my-app",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
-    "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+   "expo": {
+      "name": "my-app",
+      "slug": "my-app",
+      "version": "1.0.0",
+      "orientation": "portrait",
+      "icon": "./assets/images/icon.png",
+      "scheme": "myapp",
+      "userInterfaceStyle": "automatic",
+      "splash": {
+         "image": "./assets/images/splash.png",
+         "resizeMode": "contain",
+         "backgroundColor": "#ffffff"
       },
-      "package": "com.datnh.mp3"
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
-    },
-    "plugins": [],
-    "experiments": {
-      "typedRoutes": true
-    },
-    "extra": {
-      "eas": {
-        "projectId": "6beab678-fd89-476b-b49d-81be5c78d4cb"
+      "ios": {
+         "supportsTablet": true
+      },
+      "android": {
+         "adaptiveIcon": {
+            "foregroundImage": "./assets/images/adaptive-icon.png",
+            "backgroundColor": "#ffffff"
+         },
+         "package": "com.datnh.mp3"
+      },
+      "web": {
+         "bundler": "metro",
+         "output": "static",
+         "favicon": "./assets/images/favicon.png"
+      },
+      "plugins": [
+         [
+            "expo-media-library",
+            {
+               "isAccessMediaLocationEnabled": true
+            }
+         ]
+      ],
+      "experiments": {
+         "typedRoutes": true
+      },
+      "extra": {
+         "eas": {
+            "projectId": "6beab678-fd89-476b-b49d-81be5c78d4cb"
+         }
       }
-    }
-  }
+   }
 }

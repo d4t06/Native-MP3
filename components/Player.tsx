@@ -17,30 +17,32 @@ import {
 } from "react-native-heroicons/outline";
 import { useRef, useState } from "react";
 import { State } from "react-native-track-player";
-import trackList from "@/constants/Tracks";
-import { formatTime } from "@/utils/helper";
-import usePlayer from "@/hooks/usePlayer";
+import useControl from "@/hooks/useControl";
+import TimeSlide from "./TimeSlide";
+import { useSongContext } from "@/stores/SongContext";
 
 export default function Player() {
+   const { songs } = useSongContext();
+
    const [tab, setTab] = useState<"playing" | "queue">("playing");
 
    const deg = useRef(new Animated.Value(0)).current;
 
-   const baseRef = useRef<TouchableOpacity>(null);
-
    const {
       currentSong,
-      handleSeek,
+      currentIndex,
       handleSetSong,
       next,
       previous,
-      progress,
       state,
       togglePlayBack,
-   } = usePlayer({ processLineBaseRef: baseRef });
+   } = useControl();
 
    const pausing =
-      state == State.Paused || state == State.Stopped || state === State.Ready;
+      state == State.Paused ||
+      state == State.Stopped ||
+      state === State.Ready ||
+      !state;
 
    Animated.loop(
       Animated.timing(deg, {
@@ -55,6 +57,12 @@ export default function Player() {
 
    return (
       <>
+         {/* <Video
+            source={{
+               uri: "https://firebasestorage.googleapis.com/v0/b/zingmp3-clone-61799.appspot.com/o/test%2Fhuudat01234560-daloyeuemnhieuhoaproxretromix-justateehoaprox-5322814-mp3_1725615613911?alt=media&token=b177eb86-64d5-4459-a24b-87c3e7abaeaa",
+            }}
+         /> */}
+
          <View className="bg-amber-800 border-[4px] border-amber-900 w-[400px] max-w-[95vw] rounded-2xl p-4 max-h-[40vh]">
             <View
                className={`${
@@ -63,48 +71,17 @@ export default function Player() {
                      : "h-0 pointer-events-none opacity-0"
                }`}
             >
-               <Text numberOfLines={1} className=" font-nunito-bold text-2xl text-center text-amber-100">
+               <Text
+                  numberOfLines={1}
+                  className=" font-nunito-bold text-2xl text-center text-amber-100"
+               >
                   {currentSong?.title || "Song name"}
                </Text>
                <Text className=" font-nunito-medium text-base text-center text-amber-100">
                   {currentSong?.artist || "..."}
                </Text>
 
-               <TouchableOpacity
-                  activeOpacity={1}
-                  onPress={handleSeek}
-                  ref={baseRef}
-                  className="h-[26px] justify-center mt-5"
-               >
-                  <View className="h-[6px] flex-row bg-white/60 rounded-full items-center">
-                     {currentSong?.duration && (
-                        <View
-                           style={{
-                              width: `${
-                                 (progress.position / currentSong.duration) *
-                                 100
-                              }%`,
-                              pointerEvents: "none",
-                           }}
-                           className="relative  justify-center rounded-full h-full bg-amber-200"
-                        >
-                           <View
-                              style={{ pointerEvents: "none" }}
-                              className="absolute right-0 h-6 w-3 rounded-sm bg-amber-900 border-[2px] border-amber-200 translate-x-[7px]"
-                           ></View>
-                        </View>
-                     )}
-                  </View>
-               </TouchableOpacity>
-
-               <View className="flex-row items-center justify-between">
-                  <Text className="text-lg text-amber-100/70">
-                     {formatTime(progress.position)}
-                  </Text>
-                  <Text className="text-lg text-amber-100">
-                     {formatTime(currentSong?.duration || 0)}
-                  </Text>
-               </View>
+               <TimeSlide />
 
                <View className="mt-5 flex-row justify-center items-center">
                   <MyButton rounded={"lg"} onPress={previous} colors={"second"}>
@@ -114,7 +91,7 @@ export default function Player() {
                   <MyButton
                      rounded={"lg"}
                      onPress={togglePlayBack}
-                     disabled={state === State.Buffering}
+                     disabled={state === State.Buffering || !state}
                      backStyle={`ml-4`}
                      colors={"second"}
                   >
@@ -131,16 +108,20 @@ export default function Player() {
                               ],
                            }}
                         >
-                           <ArrowPathIcon color={"#fef3c7"} size={40} />
+                           <ArrowPathIcon
+                              className="hidden"
+                              color={"#fef3c7"}
+                              size={40}
+                           />
                         </Animated.View>
                      ) : (
-                        <>
+                        <View className={`${!state ? "opacity-60" : ""}`}>
                            {pausing ? (
                               <PlayIcon color={"#fef3c7"} size={40} />
                            ) : (
                               <PauseIcon color={"#fef3c7"} size={40} />
                            )}
-                        </>
+                        </View>
                      )}
                   </MyButton>
 
@@ -162,35 +143,43 @@ export default function Player() {
                      : "h-0 pointer-events-none opacity-0"
                }`}
             >
-               {trackList.map((s, index) => {
-                  const active = currentSong?.id === s.id;
+               {songs.length ? (
+                  songs.map((s, index) => {
+                     const active = index === currentIndex;
 
-                  return (
-                     <TouchableOpacity
-                        activeOpacity={1}
-                        onPress={() => handleSetSong(index)}
-                        key={index}
-                        className={`items-start p-2 rounded-lg ${
-                           active ? "bg-amber-100" : ""
-                        }`}
-                     >
-                        <Text
-                           className={`font-nunito-bold text-xl text-left ${
-                              active ? "text-amber-800" : "text-amber-100"
+                     return (
+                        <TouchableOpacity
+                           activeOpacity={1}
+                           onPress={() => handleSetSong(index)}
+                           key={index}
+                           className={`items-start p-2 rounded-lg ${
+                              active ? "bg-amber-100" : ""
                            }`}
                         >
-                           {s?.title || "Song name"}
-                        </Text>
-                        <Text
-                           className={`font-nunito-medium text-base text-left ${
-                              active ? "text-amber-800/70" : "text-amber-100/70"
-                           }`}
-                        >
-                           {s?.artist || "..."}
-                        </Text>
-                     </TouchableOpacity>
-                  );
-               })}
+                           <Text
+                              className={`font-nunito-bold text-xl text-left ${
+                                 active ? "text-amber-800" : "text-amber-100"
+                              }`}
+                           >
+                              {s?.title || "Song name"}
+                           </Text>
+                           <Text
+                              className={`font-nunito-medium text-base text-left ${
+                                 active
+                                    ? "text-amber-800/70"
+                                    : "text-amber-100/70"
+                              }`}
+                           >
+                              {s?.artist || "..."}
+                           </Text>
+                        </TouchableOpacity>
+                     );
+                  })
+               ) : (
+                  <Text className="text-base text-amber-100 text-center font-nunito-medium">
+                     No songs jet...
+                  </Text>
+               )}
             </ScrollView>
          </View>
 
